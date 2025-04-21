@@ -45,7 +45,9 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [10], [] => []
      * E.g., [], [] => []
      */
-    def zip[A, B](first: Sequence[A], second: Sequence[B]): Sequence[(A, B)] = ???
+    def zip[A, B](first: Sequence[A], second: Sequence[B]): Sequence[(A, B)] = (first, second) match
+      case (Cons(h1,t1), Cons(h2,t2)) => Cons((h1, h2), zip(t1, t2))
+      case _ => Nil()
 
     /*
      * Concatenate two sequences
@@ -53,15 +55,21 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [10], [] => [10]
      * E.g., [], [] => []
      */
-    def concat[A](s1: Sequence[A], s2: Sequence[A]): Sequence[A] = ???
-
+    def concat[A](s1: Sequence[A], s2: Sequence[A]): Sequence[A] = (s1,s2) match
+      case (Cons(h1,t1), Cons(h2,t2)) => Cons(h1, concat(t1, Cons(h2,t2)))
+      case (Cons(h1,t1), Nil()) => Cons(h1, t1)
+      case (Nil(), Cons(h2,t2)) => Cons(h2, t2)
+      case _ => Nil()
     /*
      * Reverse the sequence
      * E.g., [10, 20, 30] => [30, 20, 10]
      * E.g., [10] => [10]
      * E.g., [] => []
      */
-    def reverse[A](s: Sequence[A]): Sequence[A] = ???
+    def reverse[A](s: Sequence[A]): Sequence[A] = s match
+      case Cons(h,t) => concat(reverse(t), Cons(h, Nil()))
+      case _ => Nil()
+
 
     /*
      * Map the elements of the sequence to a new sequence and flatten the result
@@ -69,35 +77,62 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [10, 20, 30], calling with mapper(v => [v]) returns [10, 20, 30]
      * E.g., [10, 20, 30], calling with mapper(v => Nil()) returns []
      */
-    def flatMap[A, B](s: Sequence[A])(mapper: A => Sequence[B]): Sequence[B] = ???
+    def flatMap[A, B](s: Sequence[A])(mapper: A => Sequence[B]): Sequence[B] = s match
+      case Cons(h,t) => concat(mapper(h), flatMap(t)(mapper))
+      case _ => Nil()
 
     /*
      * Get the minimum element in the sequence
      * E.g., [30, 20, 10] => 10
      * E.g., [10, 1, 30] => 1
      */
-    def min(s: Sequence[Int]): Optional[Int] = ???
+    def min(s: Sequence[Int]): Optional[Int] = s match
+      case Cons(h,t) => min(t) match {
+        case Just(m) if h < m => Just(h)
+        case Just(m) => Just(m)
+        case _ => Just(h)
+      }
+      case Nil() => Empty()
+
 
     /*
      * Get the elements at even indices
      * E.g., [10, 20, 30] => [10, 30]
      * E.g., [10, 20, 30, 40] => [10, 30]
      */
-    def evenIndices[A](s: Sequence[A]): Sequence[A] = ???
+    def evenIndices[A](s: Sequence[A]): Sequence[A] =
+      def loop(seq: Sequence[A], i: Int): Sequence[A] = seq match
+        case Nil() => Nil()
+        case Cons(h, t) =>
+          if i % 2 == 0 then Cons(h, loop(t, i + 1))
+          else loop(t, i + 1)
+      loop(s, 0)
 
     /*
      * Check if the sequence contains the element
      * E.g., [10, 20, 30] => true if elem is 20
      * E.g., [10, 20, 30] => false if elem is 40
      */
-    def contains[A](s: Sequence[A])(elem: A): Boolean = ???
+    def contains[A](s: Sequence[A])(elem: A): Boolean = s match {
+      case Cons(h,t) => if(h == elem) true else contains(t)(elem)
+      case Nil() => false
+    }
 
     /*
      * Remove duplicates from the sequence
      * E.g., [10, 20, 10, 30] => [10, 20, 30]
      * E.g., [10, 20, 30] => [10, 20, 30]
      */
-    def distinct[A](s: Sequence[A]): Sequence[A] = ???
+    def distinct[A](s: Sequence[A]): Sequence[A] =
+      def containsLocal(seq: Sequence[A], x: A): Boolean = seq match
+        case Nil() => false
+        case Cons(h, t) => if h == x then true else containsLocal(t, x)
+      def loop(src: Sequence[A], acc: Sequence[A]): Sequence[A] = src match
+        case Nil() => reverse(acc)
+        case Cons(h, t) =>
+          if containsLocal(acc, h) then loop(t, acc)
+          else loop(t, Cons(h, acc))
+      loop(s, Nil())
 
     /*
      * Group contiguous elements in the sequence
