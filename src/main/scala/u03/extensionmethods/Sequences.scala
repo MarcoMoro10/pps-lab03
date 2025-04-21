@@ -24,10 +24,10 @@ object Sequences:
         case Cons(_, t) => t.filter(pred)
         case Nil() => Nil()
 
-      def skip(n: Int): Sequence[A] = (l, n) match
+      /*def skip(n: Int): Sequence[A] = (l, n) match
         case (Cons(_, t), n) if n > 0 => t.skip(n - 1)
         case (_, 0) => l
-        case _ => Nil()
+        case _ => Nil()*/
 
       //def zip(zipper: Sequence[String]): Sequence[String] = l match
         //case Cons(h,t) if Cons(h,t).equals(zipper)
