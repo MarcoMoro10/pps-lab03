@@ -33,7 +33,11 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [10, 20, 30], 0 => [10, 20, 30]
      * E.g., [], 2 => []
      */
-    def skip[A](s: Sequence[A])(n: Int): Sequence[A] = ???
+    def skip[A](s: Sequence[A])(n: Int): Sequence[A] = (s,n) match
+      case (Cons(h,t),n) if n >0  => skip(t)(n-1)
+      case (_, 0) => s
+      case _ => Nil()
+
 
     /*
      * Zip two sequences

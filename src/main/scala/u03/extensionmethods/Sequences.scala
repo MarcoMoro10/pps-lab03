@@ -23,8 +23,16 @@ object Sequences:
         case Cons(h, t) if pred(h) => Cons(h, t.filter(pred))
         case Cons(_, t) => t.filter(pred)
         case Nil() => Nil()
-      
-      
+
+      def skip(n: Int): Sequence[A] = (l, n) match
+        case (Cons(_, t), n) if n > 0 => t.skip(n - 1)
+        case (_, 0) => l
+        case _ => Nil()
+
+      //def zip(zipper: Sequence[String]): Sequence[String] = l match
+        //case Cons(h,t) if Cons(h,t).equals(zipper)
+        //case _ => Nil()
+
     def of[A](n: Int, a: A): Sequence[A] =
       if n == 0 then Nil[A]() else Cons(a, of(n - 1, a))
   end Sequence
